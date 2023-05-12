@@ -1,7 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
-
+import fs from 'fs';
+import { log } from 'console';
 (async () => {
 
   // Init the Express application
@@ -28,7 +29,34 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
+  app.get("/filteredimage", (req:express.Request, res:express.Response) =>{
+    const filters = req.query;
+   let {image_url} = filters;
 
+   if(!image_url){
+    return res.status(422).send("Fail");
+   }
+   filterImageFromURL(image_url);
+   console.log("add file success!!!");
+   return res.status(200).send("Success")
+  })
+
+  app.get("/deleteimage", async (req:express.Request, res:express.Response) =>{
+    
+   const basePath = "\\src\\util\\tmp\\";
+   var dirs = [];
+   var files = fs.readdirSync(process.cwd() + basePath);
+   for(var i in files) {   
+    dirs.push(process.cwd() + basePath + files[i]);
+  }
+
+  console.log("List-File -> ", dirs);
+
+   deleteLocalFiles(dirs);
+   console.log("delete file success!!!");
+
+   return res.status(200).send("Delete Success")
+  })
   //! END @TODO1
   
   // Root Endpoint
@@ -38,28 +66,6 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   } );
   
 
-  // api add images
-  app.get("/filteredimage", (req, res) =>{
-    const filters = req.query;
-   let {image_url} = filters;
-
-   filterImageFromURL(image_url);
-   console.log("add file success!!!");
-
-   const basePath = "C:/Users/ThinkPad T14/Downloads/cloud/cloud-developer/course-02/project/image-filter-starter-code/src/util/tmp/";
-   var dirs = [];
-   var files = fs.readdirSync(basePath);
-   for(var i in files) {   
-    dirs.push(basePath + files[i]);
-  }
-
-  console.log("List-File -> ", dirs);
-
-   deleteLocalFiles(dirs);
-   console.log("delete file success!!!");
-
-   res.send("Success")
-  })
   // Start the Server
   app.listen( port, () => {
       console.log( `server running http://localhost:${ port }` );
