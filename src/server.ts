@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
-import fs from 'fs';
+const fs = require('fs');
 import { log } from 'console';
 (async () => {
 
