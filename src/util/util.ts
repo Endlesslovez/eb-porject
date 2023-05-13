@@ -1,7 +1,9 @@
-const fs = require('fs');
 import Jimp = require("jimp");
-import express from 'express';
+import express from "express";
 import { error, log } from "console";
+import axios from "axios";
+const fs = require("fs");
+const path = require("path");
 
 // filterImageFromURL
 // helper function to download, filter, and save the filtered image locally
@@ -13,18 +15,20 @@ import { error, log } from "console";
 export async function filterImageFromURL(inputURL: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
-      const photo = await Jimp.read(inputURL);
-      const outpath =
-        "\\tmp\\filtered." + Math.floor(Math.random() * 2000) + ".jpg";
-      await photo
-        .resize(256, 256) // resize
-        .quality(60) // set JPEG quality
-        .greyscale() // set greyscale
-        .write(__dirname + outpath, (img) => {
-          resolve(__dirname + outpath);
-        });
+      const response = await axios({
+        method: "GET",
+        url: inputURL,
+        responseType: "stream",
+      });
+      const localFilePath = path.resolve(__dirname, "temp", "filtered." + Math.floor(Math.random() * 2000)+ ".jpg");
+      console.log("filtered",localFilePath );
+      
+      const w = response.data.pipe(fs.createWriteStream(localFilePath));
+      w.on("finish", () => {
+        resolve(localFilePath);
+      });
     } catch (error) {
-      reject("error"+ error);
+      reject("error" + error);
     }
   });
 }
