@@ -1,16 +1,15 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
-const fs = require('fs');
-import { log } from 'console';
+import express from "express";
+import bodyParser from "body-parser";
+import { filterImageFromURL, deleteLocalFiles } from "./util/util";
+const fs = require("fs");
+import { log } from "console";
 (async () => {
-
   // Init the Express application
   const app = express();
 
   // Set the network port
   const port = process.env.PORT || 8082;
-  
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -29,46 +28,53 @@ import { log } from 'console';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-  app.get("/filteredimage", (req:express.Request, res:express.Response) =>{
+  app.get("/filteredimage", async (req: express.Request, res: express.Response) => {
     const filters = req.query;
-   let {image_url} = filters;
+    let { image_url } = filters;
 
-   if(!image_url){
-    return res.status(422).send("Fail");
-   }
-   filterImageFromURL(image_url);
-   console.log("add file success!!!");
-   return res.status(200).send("Success")
-  })
+    if (!image_url) {
+      return res.status(422).send("Fail");
+    }
+    await filterImageFromURL(image_url);
+    console.log("add file success!!!");
 
-  app.get("/deleteimage", async (req:express.Request, res:express.Response) =>{
-    
-   const basePath = "\\src\\util\\tmp\\";
-   var dirs = [];
-   var files = fs.readdirSync(process.cwd() + basePath);
-   for(var i in files) {   
-    dirs.push(process.cwd() + basePath + files[i]);
-  }
+    const basePath = "\\util\\tmp\\";
+    var files = await fs.readdirSync(process.cwd() + "\\src" + basePath);
+    for (var i in files) {
+      console.log("path File", __dirname + basePath + files[i]);
+      res.status(200).sendFile(__dirname + basePath + files[i]);
+    }
+  });
 
-  console.log("List-File -> ", dirs);
+  app.get(
+    "/deleteimage",
+    async (req: express.Request, res: express.Response) => {
+      const basePath = "\\src\\util\\tmp\\";
+      var dirs = [];
+      var files = fs.readdirSync(process.cwd() + basePath);
+      for (var i in files) {
+        dirs.push(process.cwd() + basePath + files[i]);
+      }
 
-   deleteLocalFiles(dirs);
-   console.log("delete file success!!!");
+      console.log("List-File -> ", dirs);
 
-   return res.status(200).send("Delete Success")
-  })
+      deleteLocalFiles(dirs);
+      console.log("delete file success!!!");
+
+      return res.status(200).send("Delete Success");
+    }
+  );
   //! END @TODO1
-  
+
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
-    res.send("try GET /filteredimage?image_url={{}}")
-  } );
-  
+  app.get("/", async (req, res) => {
+    res.send("try GET /filteredimage?image_url={{}}");
+  });
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();
