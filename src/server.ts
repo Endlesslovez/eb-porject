@@ -2,7 +2,6 @@ import express from "express";
 import bodyParser from "body-parser";
 import { filterImageFromURL, deleteLocalFiles } from "./util/util";
 const fs = require("fs");
-import { log } from "console";
 (async () => {
   // Init the Express application
   const app = express();
@@ -12,7 +11,6 @@ import { log } from "console";
 
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
-
   // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
@@ -28,40 +26,35 @@ import { log } from "console";
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-  app.get("/filteredimage", async (req: express.Request, res: express.Response) => {
-    const filters = req.query;
-    let { image_url } = filters;
-
-    if (!image_url) {
-      return res.status(422).send("Fail");
-    }
-    await filterImageFromURL(image_url);
-    console.log("add file success!!!");
-
-    const basePath = "\\util\\tmp\\";
-    var files = await fs.readdirSync(process.cwd() + "\\src" + basePath);
-    for (var i in files) {
-      console.log("path File", __dirname + basePath + files[i]);
-      res.status(200).sendFile(__dirname + basePath + files[i]);
-    }
-  });
-
   app.get(
-    "/deleteimage",
+    "/filteredimage",
     async (req: express.Request, res: express.Response) => {
-      const basePath = "\\src\\util\\tmp\\";
-      var dirs = [];
-      var files = fs.readdirSync(process.cwd() + basePath);
-      for (var i in files) {
-        dirs.push(process.cwd() + basePath + files[i]);
+      console.log("in");
+      const filters = req.query;
+      let { image_url } = filters;
+      //Validate url
+      const isValideUrl = image_url.match(
+        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
+      );
+      if (isValideUrl == null)
+        return res.status(400).send(`Inavlid url! Try again with valid url`);
+      else {
+        //Process Image
+        const filteredImage = filterImageFromURL(image_url);
+        console.log("filteredImage", filteredImage);
+        
+        if (filteredImage === undefined || filteredImage === null){
+          return res.status(400).send(`Unable to filter image`);
+        }else{
+          filteredImage.then(function(result){
+            return res.status(200).sendFile(result, () =>{
+              const images = [];
+              images.push(result);
+              deleteLocalFiles(images);
+            });
+          })
+        }
       }
-
-      console.log("List-File -> ", dirs);
-
-      deleteLocalFiles(dirs);
-      console.log("delete file success!!!");
-
-      return res.status(200).send("Delete Success");
     }
   );
   //! END @TODO1
