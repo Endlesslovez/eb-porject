@@ -38,8 +38,8 @@ import { log } from "console";
     await filterImageFromURL(image_url);
     console.log("add file success!!!");
 
-    const basePath = "\\util\\tmp\\";
-    var files = await fs.readdirSync(process.cwd() + "\\src" + basePath);
+    const basePath = "/util/tmp/";
+    var files = await fs.readdirSync(process.cwd() + "/src" + basePath);
     for (var i in files) {
       console.log("path File", __dirname + basePath + files[i]);
       res.status(200).sendFile(__dirname + basePath + files[i]);
@@ -49,7 +49,7 @@ import { log } from "console";
   app.get(
     "/deleteimage",
     async (req: express.Request, res: express.Response) => {
-      const basePath = "\\src\\util\\tmp\\";
+      const basePath = "/src/util/tmp/";
       var dirs = [];
       var files = fs.readdirSync(process.cwd() + basePath);
       for (var i in files) {

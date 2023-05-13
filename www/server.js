@@ -44,15 +44,15 @@ const fs = require("fs");
         }
         yield util_1.filterImageFromURL(image_url);
         console.log("add file success!!!");
-        const basePath = "\\util\\tmp\\";
-        var files = yield fs.readdirSync(process.cwd() + "\\src" + basePath);
+        const basePath = "/util/tmp/";
+        var files = yield fs.readdirSync(process.cwd() + "/src" + basePath);
         for (var i in files) {
             console.log("path File", __dirname + basePath + files[i]);
             res.status(200).sendFile(__dirname + basePath + files[i]);
         }
     }));
     app.get("/deleteimage", (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const basePath = "\\src\\util\\tmp\\";
+        const basePath = "/src/util/tmp/";
         var dirs = [];
         var files = fs.readdirSync(process.cwd() + basePath);
         for (var i in files) {
