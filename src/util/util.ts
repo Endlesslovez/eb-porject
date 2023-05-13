@@ -1,6 +1,7 @@
 const fs = require('fs');
 import Jimp = require("jimp");
 import express from 'express';
+import { error, log } from "console";
 
 // filterImageFromURL
 // helper function to download, filter, and save the filtered image locally
